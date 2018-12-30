@@ -2,7 +2,7 @@
 
 @return
 
-@ integer-reply：追加操作後の文字列の長さ
+@integer-reply: 追加操作後の文字列の長さ
 
 @examples
 
