@@ -51,27 +51,24 @@ Redisのコマンドは `commands.json` ファイルに説明が書かれてい�
 
 ## スタイルガイドライン
 
-Please use the following formatting rules:
+以下のフォーマットルールを使用してください。
 
 - 行を80文字で折り返します。
-- Start every sentence on a new line.
+- すべての文を新しい行で始めてください。
 
-Luckily, this repository comes with an automated Markdown formatter.
-To only reformat the files you have modified, first stage them using `git add`
-(this makes sure that your changes won't be lost in case of an error), then run
-the formatter:
+幸いなことに、このリポジトリには自動のMarkdownフォーマッタが付属しています。変更したファイルのみを再フォーマットするには、まず`git add`を使用してファイルをステージングし（これによってエラーが発生しても変更内容が失われないようにします）、次にフォーマッターを実行します。
 
 ```
 $ rake format:cached
 ```
 
-The formatter has the following dependencies:
+フォーマッターには以下の依存関係があります。
 
 - Redcarpet
 - Nokogiri
 - `par` ツール
 
-Installation of the Ruby gems:
+Ruby gemのインストール
 
 ```
 gem install redcarpet nokogiri
@@ -89,9 +86,9 @@ par (Ubuntu)のインストール
 sudo apt-get install par
 ```
 
-## Checking your work
+## あなたの仕事をチェックする
 
-You should check your changes using Make:
+あなたはMakeを使ってあなたの変更をチェックするべきです：
 
 ```
 $ make
@@ -105,4 +102,4 @@ $ make
 $ gem install $(sed -e 's/ -v /:/' .gems)
 ```
 
-The spell checking exceptions should be added to `./wordlist`.
+スペルチェックの例外は`./wordlist`に追加する必要があります。
