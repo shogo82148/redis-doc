@@ -2,7 +2,7 @@
 
 @return
 
-@integer-reply: the length of the string after the append operation.
+@ integer-reply：追加操作後の文字列の長さ
 
 @examples
 
@@ -15,24 +15,19 @@ GET mykey
 
 ## パターン: 時系列
 
-The `APPEND` command can be used to create a very compact representation of a
-list of fixed-size samples, usually referred as *time series*.
-Every time a new sample arrives we can store it using the command
+`APPEND`コマンドを使用すると、通常*時系列*と呼ばれる固定サイズのサンプルのリストを非常にコンパクトに表現することができます。新しいサンプルが到着するたびに、コマンドを使ってそれを保存することができます。
 
 ```
 APPEND timeseries "fixed-size sample"
 ```
 
-Accessing individual elements in the time series is not hard:
+時系列の個々の要素にアクセスするのは難しくありません。
 
-- `STRLEN` can be used in order to obtain the number of samples.
-- `GETRANGE` allows for random access of elements.If our time series have associated time information we can easily implementa binary search to get range combining `GETRANGE` with the Lua scriptingengine available in Redis 2.6.
-- `SETRANGE` can be used to overwrite an existing time series.
+- サンプル数を取得するには、 `STRLEN`を使用できます。
+- `GETRANGE`は要素のランダムアクセスを可能にします。時系列に時間情報が関連付けられている場合は、 `GETRANGE`とRedis 2.6で利用可能なLuaスクリプトエンジンを組み合わせた範囲を取得するためのバイナリ検索を簡単に実装できます。
+- `SETRANGE`を使用すると、既存の時系列を上書きすることができます。
 
-The limitation of this pattern is that we are forced into an append-only mode
-of operation, there is no way to cut the time series to a given size easily
-because Redis currently lacks a command able to trim string objects.
-However the space efficiency of time series stored in this way is remarkable.
+このパターンの制限は、追加のみの操作モードを余儀なくされることです。Redisには現在文字列オブジェクトをトリミングできるコマンドがないため、時系列を特定のサイズに簡単にカットする方法はありません。しかし、このようにして保存された時系列のスペース効率は驚くべきものです。
 
 ヒント: 現在のUnix時間に基づいて別のキーに切り替えることができます。このようにすると、キーあたりのサンプル数を比較的少なくして、非常に大きなキーを扱わなくてもよくなり、このパターンを多くのRedisインスタンスに分散させるのが簡単になります。
 
