@@ -1,18 +1,15 @@
 [追記専用ファイル](/topics/persistence#append-only-file)の書き換えプロセスを開始するようにRedisに指示します。この書き換えは、現在の追記専用ファイルの小さな最適化バージョンを作成します。
 
-If `BGREWRITEAOF` fails, no data gets lost as the old AOF will be untouched.
+`BGREWRITEAOF`が失敗した場合、古いAOFは変更されないのでデータは失われません。
 
-The rewrite will be only triggered by Redis if there is not already a background
-process doing persistence.
-Specifically:
+永続化を行うバックグラウンドプロセスがまだない場合にのみ、書き換えはRedisによってトリガーされます。具体的には：
 
-- If a Redis child is creating a snapshot on disk, the AOF rewrite is*scheduled* but not started until the saving child producing the RDB fileterminates.In this case the `BGREWRITEAOF` will still return an OK code, but with anappropriate message.You can check if an AOF rewrite is scheduled looking at the `INFO` commandas of Redis 2.6.
-- If an AOF rewrite is already in progress the command returns an error and noAOF rewrite will be scheduled for a later time.
+- Redisの子がディスク上にスナップショットを作成している場合、AOFの書き換えは*スケジュールされます*が、RDBファイルを作成している保存中の子が終了するまで開始されません。この場合、 `BGREWRITEAOF`はまだOKコードを返しますが、適切なメッセージを伴っています。 Redis 2.6以降の`INFO`コマンドでAOFの書き換えがスケジュールされているかどうかを確認できます。
+- AOF書き換えがすでに進行中の場合、コマンドはエラーを返し、AOF書き換えは後でスケジュールされません。
 
-Since Redis 2.4 the AOF rewrite is automatically triggered by Redis, however the
-`BGREWRITEAOF` command can be used to trigger a rewrite at any time.
+Redis 2.4以降、AOF書き換えはRedisによって自動的に起動されますが、 `BGREWRITEAOF`コマンドを使用していつでも書き換えを起動できます。
 
-Please refer to the [persistence documentation](/topics/persistence) for detailed information.
+詳細については、 [永続化ドキュメント](/topics/persistence)を参照してください。
 
 @return
 
