@@ -10,14 +10,14 @@
 2) (integer) 0
 ```
 
-Note that:
+注意点:
 
-1. Addressing with `GET` bits outside the current string length (including the case the key does not exist at all), results in the operation to be performed like the missing part all consists of bits set to 0.
-2. Addressing with `SET` or `INCRBY` bits outside the current string length will enlarge the string, zero-padding it, as needed, for the minimal length needed, according to the most far bit touched.
+1. 現在の文字列長の外側をアドレス指定してビットを `GET` しようとすると (キーが存在しない場合も含みます), 存在しない部分に 0 が設定されていた場合と同様の結果を返します。
+2. 現在の文字列長の外側をアドレス指定していして、ビットを `SET`または `INCRBY` すると、最も遠いビットに合わせて、必要な最小長になるまで文字列が拡張され、必要に応じてゼロパディングが行われます。
 
 ## サポートされているサブコマンドと整数型
 
-The following is the list of supported commands.
+以下はサポートされているコマンドの一覧です。
 
 - **GET** `<type>` `<offset>` - 指定されたビットフィールドを返します。
 - **SET** `<type>` `<offset>` `<value>` - 指定されたビットフィールドを設定し、その古い値を返します。
@@ -27,8 +27,7 @@ The following is the list of supported commands.
 
 - **OVERFLOW** `[WRAP|SAT|FAIL]`
 
-Where an integer type is expected, it can be composed by prefixing with `i` for signed integers and `u` for unsigned integers with the number of bits of our integer type. So for example `u8` is an unsigned integer of 8 bits and `i16` is a
-signed integer of 16 bits.
+整数型を指定する箇所では、符号付き整数の場合は`i`を、符号なし整数の場合は`u`を先頭につけ、そのあとに整数型のビット数を書きます。したがって、たとえば、 `u8`は8ビットの符号なし整数、 `i16`は16ビットの符号付き整数です。
 
 サポートされている型は、符号付き整数の場合は最大64ビット、符号なし整数の場合は最大63ビットです。符号なし整数に関するこの制限は、現在Redisプロトコルが応答として64ビット符号なし整数を返すことができないという事実によるものです。
 
@@ -36,8 +35,7 @@ signed integer of 16 bits.
 
 bitfieldコマンドでオフセットを指定するには2つの方法があります。接頭辞を付けずに数値を指定すると、文字列内のゼロベースのビットオフセットとして使用されます。
 
-However if the offset is prefixed with a `#` character, the specified offset
-is multiplied by the integer type width, so for example:
+一方、オフセットの先頭に文字 `#` が付いている場合は、指定されたオフセットに整数型の幅が掛けられます。たとえば、次のようになります。
 
 ```
 BITFIELD mystring SET i8 #0 100 i8 #1 200
@@ -49,9 +47,9 @@ BITFIELD mystring SET i8 #0 100 i8 #1 200
 
 `OVERFLOW`コマンドを使用して、ユーザーは以下の動作のいずれかを指定することによって、増分または減分のオーバーフロー（またはアンダーフロー）の動作を微調整できます。
 
-- **WRAP**: wrap around, both with signed and unsigned integers. In the case of unsigned integers, wrapping is like performing the operation modulo the maximum value the integer can contain (the C standard behavior). With signed integers instead wrapping means that overflows restart towards the most negative value and underflows towards the most positive ones, so for example if an `i8` integer is set to the value 127, incrementing it by 1 will yield `-128`.
-- **SAT**: uses saturation arithmetic, that is, on underflows the value is set to the minimum integer value, and on overflows to the maximum integer value. For example incrementing an `i8` integer starting from value 120 with an increment of 10, will result into the value 127, and further increments will always keep the value at 127. The same happens on underflows, but towards the value is blocked at the most negative value.
-- **FAIL**: in this mode no operation is performed on overflows or underflows detected. The corresponding return value is set to NULL to signal the condition to the caller.
+- **WRAP**: 符号付き整数と符号なし整数の両方でラップアラウンドします。符号なし整数の場合、ラッピングはその整数が含むことができる最大値を法としてモジュロ演算を実行することに似ています（C標準動作）。符号なし整数の場合、オーバーフローは負の最小値から、アンダーフローは正の最大値から再スタートします。たとえば、 `i8` 型整数の値が 127 のとき, 1 インクリメントすると `-128` になります。
+- **SAT**: 飽和演算を使用します。つまり、アンダーフローでは値は最小整数値に設定され、オーバーフローでは最大整数値に設定されます。たとえば、値120から始まる`i8` 型整数を10インクリメントすると、値127になり、それ以降のインクリメントでは常に値127に保たれます。アンダーフローでも同様ですが、値は負の最小値でブロックされます。
+- **FAIL**: このモードでは、オーバーフローまたはアンダーフローが発生した場合、何も操作は実行されません。状況を呼び出し元に知らせるために、対応する戻り値は、NULLに設定されます。
 
 各`OVERFLOW`ステートメントは、次の`OVERFLOW`ステートメントまで、サブコマンドのリスト内でそれに続く`INCRBY`コマンドにのみ影響することに注意してください。
 
@@ -74,9 +72,7 @@ BITFIELD mystring SET i8 #0 100 i8 #1 200
 
 ## 戻り値
 
-The command returns an array with each entry being the corresponding result of
-the sub command given at the same position. `OVERFLOW` subcommands don't count
-as generating a reply.
+このコマンドは、各エントリが同じ位置に指定されたサブコマンドの対応する結果である配列を返します。 `OVERFLOW`サブコマンドは生成されたリプライには含まれません。
 
 以下は、NULLを返す`OVERFLOW FAIL`例です。
 
@@ -89,11 +85,11 @@ as generating a reply.
 
 このコマンドの動機は、多数の小さい整数を1つの大きなビットマップとして格納する（または巨大なキーを使用しないようにいくつかのキーに分割する）ことはメモリ効率が非常に高く、特にRedisの新しいユースケースが適用されることです。リアルタイム分析の分野。このユースケースは、制御された方法でオーバーフローを指定する機能によってサポートされています。
 
-Fun fact: Reddit's 2017 April fools' project [r/place](https://reddit.com/r/place) was [built using the Redis BITFIELD command](https://redditblog.com/2017/04/13/how-we-built-rplace/) in order to take an in-memory representation of the collaborative canvas.
+楽しい事実：Redditの2017年のエイプリルフールプロジェクト[r/place](https://reddit.com/r/place)では、共有キャンバスをインメモリ表現するために[Redis BITFIELDコマンドを使用して構築](https://redditblog.com/2017/04/13/how-we-built-rplace/)されました 。
 
 ## パフォーマンスの考慮事項
 
-Usually `BITFIELD` is a fast command, however note that addressing far bits of currently short strings will trigger an allocation that may be more costly than executing the command on bits already existing.
+通常`BITFIELD`は速いコマンドですが、現在は短い文字列に対して遠いビットアドレスを指定すると、メモリ割り当てが発生し、すでに存在するビットに対してコマンドを実行するよりもコストがかかる可能性があることに注意してください。
 
 ## ビットの順序
 
@@ -105,6 +101,4 @@ Usually `BITFIELD` is a fast command, however note that addressing far bits of c
 +--------+--------+
 ```
 
-When offsets and integer sizes are aligned to bytes boundaries, this is the
-same as big endian, however when such alignment does not exist, its important
-to also understand how the bits inside a byte are ordered.
+オフセットと整数サイズがバイト境界にアライメントされている場合、これはビッグエンディアンと同じですが、そのようなアライメントが存在しない場合は、バイト内のビットがどのように並んでいるかを理解することも重要です。
