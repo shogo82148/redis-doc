@@ -1,20 +1,16 @@
 文字列内の立っているビット数（population count）を数えます。
 
-By default all the bytes contained in the string are examined.
-It is possible to specify the counting operation only in an interval passing the
-additional arguments *start* and *end*.
+デフォルトでは、文字列に含まれるすべてのバイトが調べられます。追加の引数*start*と*end*を渡す間隔内でのみカウント操作を指定することができます。
 
-Like for the `GETRANGE` command start and end can contain negative values in
-order to index bytes starting from the end of the string, where -1 is the last
-byte, -2 is the penultimate, and so forth.
+`GETRANGE`コマンドの場合と同様に、文字列の末尾から始まるバイトにインデックスを付けるために、startとendに負の値を含めることができます。ここで、-1は最後のバイト、-2は最後から2番目です。
 
-Non-existent keys are treated as empty strings, so the command will return zero.
+存在しないキーは空の文字列として扱われるため、コマンドはゼロを返します。
 
 @return
 
 @integer-reply
 
-The number of bits set to 1.
+1に設定されたビット数。
 
 @examples
 
@@ -27,31 +23,21 @@ BITCOUNT mykey 1 1
 
 ## パターン：ビットマップを使用したリアルタイムメトリクス
 
-Bitmaps are a very space-efficient representation of certain kinds of
-information.
-One example is a Web application that needs the history of user visits, so that
-for instance it is possible to determine what users are good targets of beta
-features.
+ビットマップは、特定の種類の情報を非常にスペース効率よく表現したものです。 1つの例は、ユーザー訪問の履歴を必要とするWebアプリケーションです。そのため、たとえば、どのユーザーがベータ機能の優れたターゲットであるかを判断することができます。
 
-Using the `SETBIT` command this is trivial to accomplish, identifying every day
-with a small progressive integer.
-For instance day 0 is the first day the application was put online, day 1 the
-next day, and so forth.
+`SETBIT`コマンドを使用すると、これを達成するのは簡単です。毎日、小さい累進整数で識別します。たとえば、0日目はアプリケーションがオンラインになった最初の日、1日目は翌日というように続きます。
 
-Every time a user performs a page view, the application can register that in
-the current day the user visited the web site using the `SETBIT` command setting
-the bit corresponding to the current day.
+ユーザーがページビューを実行するたびに、アプリケーションは、当日にユーザーがWebサイトを訪問したことを、当日に対応するビットを設定する`SETBIT`コマンドを使用して登録できます。
 
-Later it will be trivial to know the number of single days the user visited the
-web site simply calling the `BITCOUNT` command against the bitmap.
+後でビットマップに対して`BITCOUNT`コマンドを呼び出すだけで、ユーザーがWebサイトにアクセスした1日の数を知ることは簡単です。
 
 日数の代わりにユーザーIDが使用される同様のパターンは、 "[Redisビットマップを使用した高速で簡単なリアルタイムメトリクス](http://blog.getspool.com/2011/11/29/fast-easy-realtime-metrics-using-redis-bitmaps) "という記事で説明されています 。
 
-## Performance considerations
+## パフォーマンスの考慮事項
 
 上記の日数計算の例では、10年経ってもアプリケーションがオンラインの場合でも、1ユーザーあたり`365*10`ビットのデータ、つまり1ユーザーあたりわずか456バイトしかありません。このデータ量では、 `BITCOUNT`や`GET`や`INCR` ような他の O(1) Redisコマンドと同じくらい速いです。
 
-When the bitmap is big, there are two alternatives:
+ビットマップが大きい場合、2つの選択肢があります。
 
-- Taking a separated key that is incremented every time the bitmap is modified.This can be very efficient and atomic using a small Redis Lua script.
-- Running the bitmap incrementally using the `BITCOUNT` *start* and *end*optional parameters, accumulating the results client-side, and optionallycaching the result into a key.
+- ビットマップが変更されるたびにインクリメントされる分離キーを取得します。これは、小さなRedis Luaスクリプトを使うことで非常に効率的かつアトミックになります。
+- `BITCOUNT` *開始*および*終了*オプションパラメータを使用してビットマップを増分的に実行し、結果をクライアント側で累積し、必要に応じて結果をキーにキャッシュします。
