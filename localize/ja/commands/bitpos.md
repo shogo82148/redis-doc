@@ -2,10 +2,9 @@
 
 最初のバイトの最上位ビットが位置0にあり、2番目のバイトの最上位ビットが位置8にあるというように、文字列を左から右へのビットの配列と見なして、位置が返されます。
 
-The same bit position convention is followed by `GETBIT` and `SETBIT`.
+`GETBIT` と `SETBIT` のビット位置の規則は同じです。
 
-By default, all the bytes contained in the string are examined.
-It is possible to look for bits only in a specified interval passing the additional arguments *start* and *end* (it is possible to just pass *start*, the operation will assume that the end is the last byte of the string. However there are semantic differences as explained later). The range is interpreted as a range of bytes and not a range of bits, so `start=0` and `end=2` means to look at the first three bytes.
+デフォルトでは、文字列に含まれるすべてのバイトが調べられます。引数に*start*と*end*を指定することで、特定の区間のビット列のみを調べることができます。（*start*のみを渡すことも可能です。その場合 end には文字列の最後のバイトが指定されたものとみなします。しかし後で説明するような解釈の違いがあります）。範囲はビットの範囲ではなくバイトの範囲として解釈されるため、 `start=0` および `end=2`は最初の3バイトを調べることを意味します。
 
 範囲を指定するために*start*と*end*が使用されている場合でも、ビット位置は常にビット0から始まる絶対値として返されることに注意してください。
 
@@ -19,15 +18,15 @@ It is possible to look for bits only in a specified interval passing the additio
 
 コマンドは、要求に従って1または0に設定された最初のビットの位置を返します。
 
-If we look for set bits (the bit argument is 1) and the string is empty or composed of just zero bytes, -1 is returned.
+セットビット (bit引数が1) を検索していて、文字列が空であるかゼロのバイトだけで構成されている場合、-1が返されます。
 
-If we look for clear bits (the bit argument is 0) and the string only contains bit set to 1, the function returns the first bit not part of the string on the right. So if the string is three bytes set to the value `0xff` the command `BITPOS key 0` will return 24, since up to bit 23 all the bits are 1.
+クリアビット (bit引数が0) を検索し、文字列に1に設定されたビットしか含まれていない場合、この関数は右側の文字列のセットされていない最初のビットを返します。そのため、`0xff`設定された3バイトの文字列の場合、コマンド`BITPOS key 0`は24を返します。23ビット目まではすべてのビットが1であるためです。
 
-Basically, the function considers the right of the string as padded with zeros if you look for clear bits and specify no range or the *start* argument **only**.
+範囲を指定しない、もしくは *start* 引数**のみ**を指定して、クリアビットを検索した場合、基本的に文字列の右側はゼロで埋められていると見なします。
 
-However, this behavior changes if you are looking for clear bits and specify a range with both **start** and **end**. If no clear bit is found in the specified range, the function returns -1 as the user specified a clear range and there are no 0 bits in that range.
+ただし、 **start**と**end**の両方を範囲指定しクリアビットを検索した場合、この挙動は変わります。指定された範囲内にクリアビットが見つからない場合 -1 を返します。ユーザーが明確に範囲を指定し、その範囲に0のビットはないからです。
 
-@examples
+@example
 
 ```cli
 SET mykey "\xff\xf0\x00"
